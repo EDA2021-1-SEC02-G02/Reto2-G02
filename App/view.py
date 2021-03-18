@@ -37,9 +37,13 @@ operación solicitada
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
-    print("2- ")
+    print("2- n videos con mas likes para una categoria especifica")
 
-catalog = None
+def initcatalog():
+    return controller.initcatalog()
+
+def loaddata(catalog):
+    controller.loaddata(catalog)
 
 """
 Menu principal
@@ -49,9 +53,15 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
+        cont = controller.initcatalog()
+        controller.loaddata(cont)
 
     elif int(inputs[0]) == 2:
-        pass
+        numbercategory = input("Ingrese el numero de la categoria a buscar: ")
+        cantidad = input('Cantidad de videos: ')
+        sol = controller.getvideosbycategory(cont, str(numbercategory), int(cantidad))
+        print(sol)
+
 
     else:
         sys.exit(0)
