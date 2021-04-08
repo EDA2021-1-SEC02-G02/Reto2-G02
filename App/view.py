@@ -25,7 +25,8 @@ import sys
 import controller
 from DISClib.ADT import list as lt
 assert cf
-
+default_limit = 1000
+sys.setrecursionlimit(default_limit*10)
 
 """
 La vista se encarga de la interacción con el usuario
@@ -36,8 +37,12 @@ operación solicitada
 
 def printMenu():
     print("Bienvenido")
-    print("1- Cargar información en el catálogo")
-    print("2- n videos con mas likes para una categoria especifica")
+    print("1 - Cargar información en el catálogo")
+    print("2 - Req1: N videos tendencia en un pais por categoria.")
+    print("3 - Req2: Video que mas dias ha sido trending para un pais.")
+    print("4 - Req3: Video que mas dias ha sido trending para una categoria.")
+    print("5 - Req4: ######################################################.")
+    print('0 - Salir.')
 
 def initcatalog():
     return controller.initcatalog()
@@ -51,17 +56,67 @@ Menu principal
 while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
+    
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
         cont = controller.initcatalog()
-        controller.loaddata(cont)
+        catalog = controller.loaddata(cont)
+        print("Tiempo [ms]: ", f"{catalog[1]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{catalog[2]:.3f}")
 
+    # Requerimiento 1.
     elif int(inputs[0]) == 2:
-        numbercategory = input("Ingrese el numero de la categoria a buscar: ")
-        cantidad = input('Cantidad de videos: ')
-        sol = controller.getvideosbycategory(cont, str(numbercategory), int(cantidad))
-        print(sol)
+        pais = input("Ingrese el pais: ")
+        categoria = input("Ingrese la categoria: ")
+        cantidad = input("Ingrese la cantidad de videos que desea ver: ") 
+        sol = controller.requerimiento1(cont, str(pais), str(categoria), int(cantidad))
+        
+        if sol:
+            for video in lt.iterator(sol):
+                print( '--> '+ 'trending_date: ' + video['trending_date'] + ' ||' +
+                    ' Title: ' + video['title'] + ' ||' +
+                    ' Channel_title: ' + video['channel_title'] + ' ||' +
+                    ' Publish_time: ' + video['publish_time'] + ' ||' +
+                    ' Views: ' + video['views'] + ' ||' + 
+                    ' Likes: ' + video['likes'] + ' ||' +
+                    ' Dislikes: ' + video['dislikes'])
+            print("\n")
+        else:
+            print('Es posible que el pais o categoria que busque no existe.\n')
+    
+    
+    # Requerimiento 2.
+    elif int(inputs[0]) == 3:
+        pais = input('Ingrese el nombre del pais a buscar: ')
+        sol = controller.requerimiento2(cont, str(pais))
+        video  = sol[0]
+        print('--> '+
+              ' Title: ' + video['title'] + ' ||' +
+              ' Channel_title: ' + video['channel_title'] +  ' ||' +
+              ' Country: ' + video['country']+ ' ||'+ 
+              ' Dias: ' + str(sol[1]) + '.')
+    
 
+
+
+
+
+
+    # Requerimiento 3.
+    
+    
+    
+    
+    
+    
+    # Requerimiento 4.
+    
+
+    
+    
+    
+    
+    
 
     else:
         sys.exit(0)

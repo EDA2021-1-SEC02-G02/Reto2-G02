@@ -42,33 +42,98 @@ los mismos.
 # Construccion de modelos
 def newCatalog():
     catalog = {'videos': None,
-               'categorias': None}
+               'paisescat': None,
+               'categorias': None,
+               'paises': None,
+               'tendencias': None}
     
     catalog['videos'] =  lt.newList('ARRAY_LIST', cmpfunction = None)
-    catalog['categorias'] = mp.newMap(800,
-                                   maptype='CHAINING',
-                                   loadfactor=4.0,
+    
+    catalog['paisescat']= mp.newMap(10,
+                                maptype='PROBING',
+                                loadfactor=0.5,
+                                comparefunction=None)
+    
+    catalog['categorias'] = mp.newMap(18,
+                                      maptype='PROBING',
+                                      loadfactor=0.5,
+                                      comparefunction= None)
+    
+    catalog['paises'] = mp.newMap(10,
+                                   maptype='PROBING',
+                                   loadfactor=0.5,
                                    comparefunction= None)
     return catalog
 
+
 # Funciones para agregar informacion al catalogo
+
 def addvideo(catalog, video):
     lt.addLast(catalog['videos'], video)
-    category = video['category_id'] 
-    addcategory(catalog, category.strip(), video)
+    pais= video['country']
+    videoid = video["video_id"]
+    category = video['category_id']
+    
+    addcountry(catalog, pais.strip(), videoid.strip(), video)
+    addcategory(catalog, category.strip(), videoid.strip(), video)
+    addpaisescat(catalog, pais.strip(), category.strip(), video)
 
-def addcategory(catalog, categoryname, video):
+def addpaisescat(catalog, pais, categoria, video):
+    mappaiscat = catalog['paisescat']
+    existcountry = mp.contains(mappaiscat, pais)
+    if existcountry:
+        country = mp.get(mappaiscat, pais)
+        category = me.getValue(country)
+        if categoria in category:
+            lt.addLast(category[categoria], video)
+        else:
+            category= addnewcategorycat(category, categoria, video)
+    else:
+        dic = {}
+        dic = addnewcategorycat(dic, categoria, video)
+        mp.put(mappaiscat, pais, dic)
+
+def addcategory(catalog, categoryname, videoid, video):
     mapcategorias = catalog['categorias']
     existcategory = mp.contains(mapcategorias, categoryname)
     if existcategory:
         pareja = mp.get(mapcategorias, categoryname)
-        category= me.getValue(pareja)
+        category= me.getValue(pareja) # category seria el nuevo map
     else:
-        category = newcategory(categoryname)
+        category = newmap()
         mp.put(mapcategorias, categoryname, category)
-    lt.addLast(category['videos'], video)
-        
+    category = tendencias(category, videoid, video)   
     
+def addcountry(catalog, countryname, videoid, video):
+    pass
+    mappaises = catalog['paises']
+    existcountry = mp.contains(mappaises, countryname)
+    if existcountry:
+        pareja = mp.get(mappaises, countryname)
+        country = me.getValue(pareja)
+    else:
+        country = newmap()
+        mp.put(mappaises, countryname, country)
+    countryi = tendencias(country, videoid, video)
+        
+def tendencias(mapp, videoid, video):
+    existvideo = mp.contains(mapp, videoid)
+    if existvideo:
+        pareja = mp.get(mapp, videoid)
+        trending= me.getValue(pareja)
+        trending["tendencias"]+=1
+    else:
+        trending= {'videoid': videoid , 'tendencias': 1 , 'video' : video}
+        mp.put(mapp, videoid, trending)
+
+def newmap():
+    country= mp.newMap(120000, #poner 120000
+                       maptype='PROBING',
+                       loadfactor=0.9,
+                       comparefunction=None)
+
+    return country
+       
 
 # Funciones para creacion de datos
 def newcategory(categorynumber):
@@ -77,29 +142,86 @@ def newcategory(categorynumber):
     category['videos'] = lt.newList('ARRAY_LIST')
     return category
 
-# Funciones de consulta
+def addnewcategorycat(dic, categorynumber, video):
+    dic[str(categorynumber)]= lt.newList('ARRAY_LIST')
+    lt.addLast(dic[str(categorynumber)], video)
+    return dic
 
-def getvideosbycategory(catalog, categorynumber, cantidad):
-    category= mp.get(catalog['categorias'], categorynumber)
-    if category:
-        lista = me.getValue(category)
-        
-        lista= lista['videos']
-        result = sortVideos(lista, cantidad, cmpVideosByViews)
-        return result
+def addnewcountry(countryname):
+    country = {'name_country': "", "videos": None}
+    country['name_country'] = countryname
+    country['videos'] = lt.newList('ARRAY_LIST')
+    return country
+
+
+
+# Funciones de consulta
+def requerimiento1(catalog, countryname, categorynumber, cantidad):
+    pais = mp.get(catalog['paisescat'], countryname)
+    if pais:
+        dicccat = me.getValue(pais)
+        lista = dicccat[categorynumber]
+        result = sortVideos(lista, cmpVideosByViews)
+        lista_retornar = None
+        lista_retornar= lt.newList('ARRAY_LIST')
+        iterador = it.newIterator(result)
+        i=0
+        while (it.hasNext(iterador)) and i<cantidad:
+            elemento= it.next(iterador)
+            lt.addLast(lista_retornar, elemento)
+            i+=1
+        return lista_retornar 
     return None
+
+def requerimiento2(catalog, pais):
+    pais = mp.get(catalog['paises'], pais)
+    if pais:
+        mapcountry = me.getValue(pais)
+        values = mp.valueSet(mapcountry)
+        sol_requ2 = mayor_trending(values)
+        return sol_requ2
+    else:
+        return None
+        
+def mayor_trending(arraylist):
+    if arraylist:
+        mayor_trending = 0
+        infovideo  = None
+        for video in lt.iterator(arraylist):
+            if video['tendencias'] > mayor_trending:
+                mayor_trending =video['tendencias']
+                infovideo = video['video']
+        
+        return infovideo, mayor_trending
+    else:
+        return None
+    
+    
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
+
 # Funciones de ordenamiento
 def cmpVideosByViews(video1, video2):
-    if video1['views'] < video2['views']:
+    if float(video1['views']) > float(video2['views']):
         return True
     else:
         return False
     
-def sortVideos(lst,size,cmp):
+def sortVideos(lst,cmp):
+    size= lt.size(lst)
     copia_lista = lst.copy()
     list_orden = qck.sort(copia_lista, cmp)
     resul = lt.subList(list_orden, 1, size)
     return resul
+
+
+def funordenamientos(catalog):
+    paisescat = catalog['paisescat']
+    keylist = mp.keySet(paisescat)
+    iterador = it.newIterator(keylist)
+    while it.hasNext(iterador):
+        dicc = it.next(iterador)
+        for f in dicc.values():
+            pass
+    
