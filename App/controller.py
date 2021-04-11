@@ -36,6 +36,8 @@ def initcatalog():
     catalog = model.newCatalog()
     return catalog
 
+
+
 # Funciones para la carga de datos
 def loaddata(catalog):
     
@@ -63,7 +65,8 @@ def loadvideos(catalog):
     for video in input_file:
         model.addvideo(catalog, video) 
 
-# Funciones de ordenamiento
+
+
 
 # Funciones de consulta sobre el catálogo
 
@@ -74,6 +77,16 @@ def requerimiento1(catalog, countryname, categoryname, cantidad):
 def requerimiento2(catalog, countryname):
     llaves = model.requerimiento2(catalog, countryname)
     return llaves
+
+def requerimiento3(catalog, categoryname):
+    llaves = model.requerimiento3(catalog, categoryname)
+    return llaves
+
+def requerimiento4(catalog, pais, tag , cantidad):
+    videos = model.requerimiento4(catalog, pais, tag , cantidad)
+    return videos
+
+
 
 # ======================================
 # Funciones para medir tiempo y memoria
