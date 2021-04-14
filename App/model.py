@@ -31,6 +31,7 @@ from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 from DISClib.Algorithms.Sorting import quicksort as qck
+from DISClib.Algorithms.Sorting import mergesort as marg
 assert cf
 from DISClib.DataStructures import listiterator as it
 
@@ -47,7 +48,7 @@ def newCatalog():
                'paises': None,
                'tendencias': None}
     
-    # catalog['videos'] =  lt.newList('ARRAY_LIST', cmpfunction = None)
+    catalog['videos'] =  lt.newList('ARRAY_LIST', cmpfunction = None)
     
     catalog['paisescat']= mp.newMap(10,
                                 maptype='PROBING',
@@ -75,7 +76,7 @@ def newCatalog():
 # Funciones para agregar informacion al catalogo
 
 def addvideo(catalog, video):
-    #lt.addLast(catalog['videos'], video)
+    lt.addLast(catalog['videos'], video)
     pais= video['country']
     videoid = video["video_id"]
     category = video['category_id']
@@ -169,6 +170,7 @@ def requerimiento1(catalog, countryname, categorynumber, cantidad):
         dicccat = me.getValue(pais)
         lista = dicccat[categorynumber]
         result = sortVideos(lista, cmpVideosByViews)
+        lista_retornar= None
         lista_retornar= lt.newList('ARRAY_LIST')
         iterador = it.newIterator(result)
         i=0
@@ -176,8 +178,9 @@ def requerimiento1(catalog, countryname, categorynumber, cantidad):
             elemento= it.next(iterador)
             lt.addLast(lista_retornar, elemento)
             i+=1
-        return lista_retornar 
-    return None
+        return lista_retornar
+    else:
+        return None
 
 def requerimiento2(catalog, country):
     pais = mp.get(catalog['paises'], country)
@@ -208,7 +211,9 @@ def requerimiento4(catalog, pais, tag, cantidad):
         return lista_retornar
     else:
         return None
-        
+
+
+# funciones auxiliares para consultar datos.     
 def findvideos(listavid, tag, cantidad):
     lista_retornar = lt.newList('ARRAY_LIST')
     iterador = it.newIterator(listavid)
@@ -232,7 +237,6 @@ def mayor_trending(arraylist):
             if video['tendencias'] > mayor_trending:
                 mayor_trending =video['tendencias']
                 infovideo = video['video']
-        
         return infovideo, mayor_trending
     else:
         return None
@@ -259,7 +263,7 @@ def cmpvideosbylikes(video1, video2):
 def sortVideos(lst,cmp):
     size= lt.size(lst)
     copia_lista = lst.copy()
-    list_orden = qck.sort(copia_lista, cmp)
+    list_orden = marg.sort(copia_lista, cmp)
     return list_orden
 
     

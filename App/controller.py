@@ -60,13 +60,11 @@ def loaddata(catalog):
     return catalog, delta_time, delta_memory
     
 def loadvideos(catalog):
-    videosfile = cf.data_dir + 'videoss/videos-large.csv'
+    videosfile = cf.data_dir + 'videos/videos-large.csv'
     input_file = csv.DictReader(open(videosfile, encoding='utf-8'))
     for video in input_file:
-        model.addvideo(catalog, video) 
-
-
-
+        model.addvideo(catalog, video)
+        
 
 # Funciones de consulta sobre el catálogo
 

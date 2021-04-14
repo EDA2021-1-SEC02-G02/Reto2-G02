@@ -61,6 +61,7 @@ while True:
         print("Cargando información de los archivos ....")
         cont = controller.initcatalog()
         catalog = controller.loaddata(cont)
+        print('Videos cargados: ', lt.size(cont['videos']))
         print("Tiempo [ms]: ", f"{catalog[1]:.3f}", "  ||  ",
               "Memoria [kB]: ", f"{catalog[2]:.3f}")
 
@@ -68,7 +69,7 @@ while True:
     elif int(inputs[0]) == 2:
         pais = input("Ingrese el pais: ")
         categoria = input("Ingrese la categoria: ")
-        cantidad = input("Ingrese la cantidad de `videos que desea ver: ") 
+        cantidad = input("Ingrese la cantidad de videos que desea ver: ") 
         sol = controller.requerimiento1(cont, str(pais), str(categoria), int(cantidad))
 
         if sol:
@@ -93,8 +94,8 @@ while True:
         print('--> '+
               ' Title: '         + video['title']          + ' ||' +
               ' Channel_title: ' + video['channel_title']  + ' ||' +
-              ' Country: '       + video['country']        + ' ||'+ 
-              ' Dias: '          + str(sol[1])             + '.')   
+              ' Country: '       + video['country']        + ' ||' + 
+              ' Dias: '          + str(sol[1])             + '.'   )   
     
     # Requerimiento 3.
     elif int(inputs[0]) == 4:
@@ -104,8 +105,8 @@ while True:
         print('--> '+
               ' Title: '          + video['title']           + ' ||' +
               ' Channel_title: '  + video['channel_title']   + ' ||' +
-              ' Country: '        + video['country']         + ' ||'+ 
-              ' Dias: '           + str(sol[1])              + '.')
+              ' Country: '        + video['country']         + ' ||' + 
+              ' Dias: '           + str(sol[1])              + '.'   )
     
     # Requerimiento 4.
     elif int(inputs[0]) == 5:
@@ -123,7 +124,7 @@ while True:
                     ' Views: '          + video['views']          + ' ||' + 
                     ' Likes: '          + video['likes']          + ' ||' +
                     ' Dislikes: '       + video['dislikes']       + ' ||' + 
-                    'Tags : '           + video['tags']           + '.')
+                    'Tags : '           + video['tags']           + '.'   )
             print("\n")
         else:
             print('Es posible que el pais o categoria que busque no existe.\n')
